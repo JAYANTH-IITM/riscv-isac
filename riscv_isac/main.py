@@ -38,8 +38,8 @@ def cli(verbose):
     )
 @click.option(
         '--cgf-file','-c',multiple=True,
-        type=click.Path(resolve_path=True,readable=True,exists=True),
-        help="Coverage Group File(s). Multiple allowed.",required=True
+        type=click.Path(resolve_path=True,readable=True,exists=False),
+        help="Coverage Group File(s). Multiple allowed.",required=False
     )
 @click.option(
         '--detailed', '-d',
@@ -130,11 +130,16 @@ def cli(verbose):
         is_flag = True,
         help = "Log redundant coverpoints during normalization"
 )
+@click.option('--inxFlg', 'inxFlg',
+        type=bool, 
+        default = False, 
+        help="Enable inxFlg if the extension is Z*inx"
+)
 
 def coverage(elf,trace_file, window_size, cgf_file, detailed,parser_name, decoder_name, parser_path, decoder_path,output_file, test_label,
-        sig_label, dump,cov_label, xlen, flen, no_count, procs, log_redundant):
+        sig_label, dump,cov_label, xlen, flen, no_count, procs, log_redundant, inxFlg):
     isac(output_file,elf,trace_file, window_size, expand_cgf(cgf_file,int(xlen),int(flen),log_redundant), parser_name, decoder_name, parser_path, decoder_path, detailed, test_label,
-            sig_label, dump, cov_label, int(xlen), int(flen), no_count, procs)
+            sig_label, dump, cov_label, int(xlen), int(flen), inxFlg, no_count, procs)
 
 @cli.command(help = "Merge given coverage files.")
 @click.argument(
@@ -154,8 +159,8 @@ def coverage(elf,trace_file, window_size, cgf_file, detailed,parser_name, decode
         )
 @click.option(
         '--cgf-file','-c',multiple=True,
-        type=click.Path(resolve_path=True,readable=True,exists=True),
-        help="Coverage Group File(s). Multiple allowed.",required=True
+        type=click.Path(resolve_path=True,readable=True,exists=False),
+        help="Coverage Group File(s). Multiple allowed.",required=False
     )
 @click.option(
         '--output-file','-o',
@@ -189,8 +194,8 @@ def merge(files,detailed,p,cgf_file,output_file,flen,xlen,log_redundant):
 @cli.command(help = "Normalize the cgf.")
 @click.option(
         '--cgf-file','-c',multiple=True,
-        type=click.Path(resolve_path=True,readable=True,exists=True),
-        help="Coverage Group File(s). Multiple allowed.",required=True
+        type=click.Path(resolve_path=True,readable=True,exists=False),
+        help="Coverage Group File(s). Multiple allowed.",required=False
     )
 @click.option(
         '--output-file','-o',
@@ -226,6 +231,9 @@ def normalize(cgf_file,output_file,xlen,flen,log_redundant):
 # Clone repo
 def setup(url,branch, plugin_path, rvop_path):
     # path = os.getcwd() + '/plugins/riscv_opcodes/'
+    print("i am here")
+    print(plugin_path)
+    print(rvop_path)
     if not os.path.exists(plugin_path):
         logger.debug("Creating directory: "+str(plugin_path))
         os.mkdir(plugin_path)
@@ -249,7 +257,9 @@ def setup(url,branch, plugin_path, rvop_path):
         repo = Repo.clone_from(url, target_dir)
         repo.git.checkout(branch)
     plugin_file = os.path.join(os.path.dirname(__file__), "data/rvopcodesdecoder.py")
+    print(plugin_file)
     constants_file = os.path.join(os.path.dirname(__file__), "data/constants.py")
+    print(constants_file)
     logger.debug("Copying plugin files.")
     shutil.copy(plugin_file,plugin_path)
     shutil.copy(constants_file,plugin_path)
