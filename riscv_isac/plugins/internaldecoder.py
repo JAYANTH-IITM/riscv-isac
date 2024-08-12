@@ -2236,7 +2236,16 @@ class disassembler():
         '''Parse instructions from Quad2 of the Compressed extension in the RISCV-ISA-Standard'''
         instr = instrObj.instr
         funct3 = (self.C_FUNCT3_MASK & instr) >> 13
-
+        zcmp_15 = self.get_bit(instr, 15)
+        zcmp_14 = self.get_bit(instr, 14)
+        zcmp_13 = self.get_bit(instr, 13)
+        zcmp_12 = self.get_bit(instr, 12)
+        zcmp_11 = self.get_bit(instr, 11)
+        zcmp_10 = self.get_bit(instr, 10)
+        zcmp_9 = self.get_bit(instr, 9)
+        zcmp_8 = self.get_bit(instr, 8)
+        funct6 = (zcmp_15 << 5) | (zcmp_14 << 4)  | (zcmp_13 << 3) | (zcmp_12 << 2) | (zcmp_11 << 1) | (zcmp_10) #push:46
+        funct2 = (zcmp_9 << 1)  | (zcmp_8) #push:0
         imm_5 = self.get_bit(instr, 12) << 5
         imm_4_0 = (instr & 0x007c) >> 2
         imm_4_3 = (instr & 0x0060) >> 2
@@ -2246,6 +2255,7 @@ class disassembler():
         imm_9_6 = (instr & 0x003C) << 5
         imm_7_6 = (instr & 0x000C) << 4
         imm_8_6 = (instr & 0x001C) << 4
+        imm_val= (instr & 2) << 1
 
         imm_5_3 = (instr & 0x1c00) >> 7
         imm_s_8_6 = (instr & 0x0380) >> 1
@@ -2262,6 +2272,8 @@ class disassembler():
         imm_ldsp = imm_5 + imm_4_3 + imm_8_6
         imm_fsdsp = imm_5_3 + imm_s_8_6
         imm_swsp = imm_5_2 + imm_s_7_6
+        imm_cmjt = (instr >> 2) & 0xFF
+
 
         if funct3 == 0 and imm_slli !=0 and rd !=0:
             instrObj.instr_name = 'c.slli'
@@ -2273,6 +2285,12 @@ class disassembler():
             instrObj.rd = (rd, 'f')
             instrObj.imm = imm_fldsp
             instrObj.rs1 = (2, 'x')
+        elif funct6 == 40:
+            instrObj.imm = imm_cmjt
+            if imm_cmjt >= 32:
+                instrObj.instr_name = 'cm.jalt'
+            elif imm_cmjt < 32 :
+                instrObj.instr_name = 'cm.jt'
         elif funct3 == 2 and rd != 0:
             instrObj.instr_name = 'c.lwsp'
             instrObj.rs1 = (2, 'x')

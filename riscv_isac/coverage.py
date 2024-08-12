@@ -78,6 +78,7 @@ csr_reg_num_to_str = {
     1: 'fflags',
     2: 'frm',
     3: 'fcsr',
+    23: 'jvt',
 }
 
 class cross():
