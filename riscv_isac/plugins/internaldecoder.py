@@ -2236,8 +2236,6 @@ class disassembler():
         '''Parse instructions from Quad2 of the Compressed extension in the RISCV-ISA-Standard'''
         instr = instrObj.instr
         funct3 = (self.C_FUNCT3_MASK & instr) >> 13
-
-        imm_5 = self.get_bit(instr, 12) << 5
         imm_4_0 = (instr & 0x007c) >> 2
         imm_4_3 = (instr & 0x0060) >> 2
         imm_4 = self.get_bit(instr, 6) << 4
@@ -2273,7 +2271,6 @@ class disassembler():
             instrObj.rd = (rd, 'f')
             instrObj.imm = imm_fldsp
             instrObj.rs1 = (2, 'x')
-        elif funct3 == 2 and rd != 0:
             instrObj.instr_name = 'c.lwsp'
             instrObj.rs1 = (2, 'x')
             instrObj.rd = (rd, 'x')
